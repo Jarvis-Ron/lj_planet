@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>L&J's Planet</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ===== Onboarding ===== -->
+<div id="onboarding-overlay" class="onboarding-overlay hidden">
+  <div class="onboarding-card">
+    <div class="onboarding-icon">&#128640;</div>
+    <h2>&#27426;&#36814;&#26469;&#21040; L&J's Planet</h2>
+    <p class="subtitle">&#20808;&#26469;&#35774;&#32622;&#19968;&#19979;&#20320;&#20204;&#30340;&#23567;&#26143;&#29699;&#21543;</p>
+    <div class="form-group">
+      <label>L&#65288;&#22905;&#30340;&#21517;&#23383;&#65289;</label>
+      <input type="text" id="setup-name1" placeholder="&#36755;&#20837; L &#30340;&#21517;&#23383;" maxlength="20">
+    </div>
+    <div class="form-group">
+      <label>J&#65288;&#20320;&#30340;&#21517;&#23383;&#65289;</label>
+      <input type="text" id="setup-name2" placeholder="&#36755;&#20837; J &#30340;&#21517;&#23383;" maxlength="20">
+    </div>
+    <div class="form-group">
+      <label>&#22312;&#19968;&#36215;&#30340;&#26085;&#23376;</label>
+      <input type="date" id="setup-startdate">
+    </div>
+    <button class="btn-primary" onclick="APP.setupPlanet()">&#24320;&#22987;&#25105;&#20204;&#30340;&#26143;&#29699;</button>
+  </div>
+</div>
+
+<!-- ===== Login Overlay ===== -->
+<div id="login-overlay" class="onboarding-overlay hidden">
+  <div class="onboarding-card">
+    <div class="onboarding-icon">&#128274;</div>
+    <h2>&#30331;&#24405; L&J's Planet</h2>
+    <p class="subtitle">&#36873;&#25321;&#36523;&#20221;&#21518;&#36755;&#20837;&#23494;&#30721;</p>
+    <div class="login-users" style="display:flex;gap:16px;justify-content:center;margin:16px 0">
+      <button class="login-user-btn" onclick="APP.selectUser('L')" style="flex:1;padding:16px;border:2px solid var(--rose-light);border-radius:var(--radius);background:var(--card-bg);cursor:pointer;font-family:inherit">
+        <div style="font-size:28px">&#9886;</div>
+        <div style="font-weight:600;font-size:18px">L</div>
+        <div style="font-size:13px;color:var(--text-secondary)">Lyra</div>
+      </button>
+      <button class="login-user-btn" onclick="APP.selectUser('J')" style="flex:1;padding:16px;border:2px solid var(--rose-light);border-radius:var(--radius);background:var(--card-bg);cursor:pointer;font-family:inherit">
+        <div style="font-size:28px">&#9887;</div>
+        <div style="font-weight:600;font-size:18px">J</div>
+        <div style="font-size:13px;color:var(--text-secondary)">Jarvis</div>
+      </button>
+    </div>
+    <div class="form-group" id="login-pwd-group" style="display:none">
+      <label>&#23494;&#30721;</label>
+      <input type="password" id="login-pwd" placeholder="&#36755;&#20837;&#23494;&#30721;" onkeydown="if(event.key==='Enter')APP.doLogin()">
+    </div>
+    <button class="btn-primary" id="login-btn" style="display:none" onclick="APP.doLogin()">&#30331;&#24405;</button>
+    <p style="margin-top:12px;font-size:13px"><a href="#" onclick="APP.closeLogin();return false" style="color:var(--text-secondary)">&#31163;&#32447;&#20351;&#29992; &rarr;</a></p>
+  </div>
+</div>
+
+<!-- ===== Settings Panel ===== -->
+<div id="settings-panel" class="settings-panel hidden">
+  <div class="settings-header">
+    <h2>&#26143;&#29699;&#35774;&#32622;</h2>
+    <button class="btn-icon" onclick="APP.toggleSettings()">&times;</button>
+  </div>
+  <div class="settings-body">
+    <div class="form-group">
+      <label>L&#65288;&#22905;&#30340;&#21517;&#23383;&#65289;</label>
+      <input type="text" id="settings-name1" maxlength="20">
+    </div>
+    <div class="form-group">
+      <label>J&#65288;&#20320;&#30340;&#21517;&#23383;&#65289;</label>
+      <input type="text" id="settings-name2" maxlength="20">
+    </div>
+    <div class="form-group">
+      <label>&#22312;&#19968;&#36215;&#30340;&#26085;&#23376;</label>
+      <input type="date" id="settings-startdate">
+    </div>
+    <button class="btn-primary" onclick="APP.saveSettings()">&#20445;&#23384;&#35774;&#32622;</button>
+    <hr>
+    <h3>&#25968;&#25454;&#31649;&#29702;</h3>
+    <button class="btn-secondary" onclick="APP.exportData()">&#23548;&#20986;&#25968;&#25454;&#22791;&#20221;</button>
+    <br><br>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="APP.importData(event)">
+    <button class="btn-secondary" onclick="document.getElementById('import-file').click()">&#23548;&#20837;&#25968;&#25454;&#22791;&#20221;</button>
+  </div>
+</div>
+
+<!-- ===== App ===== -->
+<div id="app">
+  <header id="app-header">
+    <div class="header-left">
+      <span class="header-planet-name">L&J's Planet</span>
+    </div>
+    <div class="header-right">
+      <span id="header-days" class="header-days"></span>
+      <span id="header-user" class="header-user" onclick="APP.toggleLogin()" style="font-size:12px;cursor:pointer;color:var(--text-secondary);margin-right:8px"></span>
+      <button class="btn-icon settings-btn" onclick="APP.toggleSettings()" title="&#35774;&#32622;">&#9881;</button>
+    </div>
+  </header>
+
+  <main id="page-container">
+    <!-- ===== Home ===== -->
+    <section id="page-home" class="page active">
+      <div class="home-hero">
+        <div class="home-planet-icon">&#128640;</div>
+        <h1 class="home-title"><span id="home-name1"></span> &amp; <span id="home-name2"></span></h1>
+        <div class="home-counter">
+          <span class="counter-number" id="home-daycount">0</span>
+          <span class="counter-label">&#22825;</span>
+        </div>
+        <p class="home-subtitle">&#25105;&#20204;&#24050;&#32463;&#22312;&#19968;&#36215;</p>
+      </div>
+      <div class="home-cards">
+        <div class="home-card" onclick="APP.navigate('calendar')">
+          <div class="home-card-icon">&#128197;</div>
+          <div class="home-card-info">
+            <div class="home-card-title">&#32426;&#24565;&#26085;</div>
+            <div class="home-card-stat" id="home-stat-anniv">0 &#20010;</div>
+          </div>
+        </div>
+        <div class="home-card" onclick="APP.navigate('places')">
+          <div class="home-card-icon">&#128205;</div>
+          <div class="home-card-info">
+            <div class="home-card-title">&#36275;&#36857;</div>
+            <div class="home-card-stat" id="home-stat-places">0 &#20010;</div>
+          </div>
+        </div>
+        <div class="home-card" onclick="APP.navigate('notes')">
+          <div class="home-card-icon">&#128221;</div>
+          <div class="home-card-info">
+            <div class="home-card-title">&#38543;&#31508;</div>
+            <div class="home-card-stat" id="home-stat-notes">0 &#26465;</div>
+          </div>
+        </div>
+        <div class="home-card" onclick="APP.navigate('story')">
+          <div class="home-card-icon">&#128214;</div>
+          <div class="home-card-info">
+            <div class="home-card-title">&#25925;&#20107;</div>
+            <div class="home-card-stat" id="home-stat-story">0 &#31456;</div>
+          </div>
+        </div>
+        <div class="home-card" onclick="APP.navigate('wishes')">
+          <div class="home-card-icon">&#127775;</div>
+          <div class="home-card-info">
+            <div class="home-card-title">&#24895;&#26395;</div>
+            <div class="home-card-stat" id="home-stat-wishes"><span id="home-wish-progress">0/0</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="home-next-anniv" id="home-next-anniv">
+        <div class="next-anniv-label">&#19979;&#19968;&#20010;&#32426;&#24565;&#26085;</div>
+        <div class="next-anniv-countdown" id="home-countdown">--</div>
+        <div class="next-anniv-name" id="home-next-name">--</div>
+      </div>
+      <div class="home-random-note" id="home-random-note" style="display:none">
+        <div class="random-note-label">&#127912; &#22238;&#24518;&#19968;&#35282;</div>
+        <div class="random-note-content" id="home-random-content"></div>
+      </div>
+    </section>
+
+    <!-- ===== Calendar ===== -->
+    <section id="page-calendar" class="page">
+      <div class="page-header">
+        <h2>&#128197; &#26102;&#20809;&#38271;&#24266;</h2>
+        <button class="btn-primary" onclick="APP.showModal('anniversary')">+ &#26032;&#32426;&#24565;&#26085;</button>
+      </div>
+      <div class="calendar-nav">
+        <button class="btn-icon" onclick="APP.calendarMonth(-1)">&#8249;</button>
+        <span class="calendar-month-label" id="calendar-label">2026&#24180; 1&#26376;</span>
+        <button class="btn-icon" onclick="APP.calendarMonth(1)">&#8250;</button>
+      </div>
+      <div class="calendar-weekdays">
+        <span>&#26085;</span><span>&#19968;</span><span>&#20108;</span><span>&#19977;</span><span>&#22235;</span><span>&#20116;</span><span>&#20845;</span>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div id="anniv-filter-area" class="anniv-filter"></div><div class="anniv-list" id="anniv-list">
+        <h3>&#25152;&#26377;&#32426;&#24565;&#26085;</h3>
+        <div id="anniv-items"></div>
+      </div>
+    </section>
+
+    <!-- ===== Places ===== -->
+    <section id="page-places" class="page">
+      <div class="page-header">
+        <h2>&#128205; &#25105;&#20204;&#30340;&#36275;&#36857;</h2>
+        <button class="btn-primary" onclick="APP.showModal('place')">+ &#26032;&#22320;&#28857;</button>
+      </div>
+      <div class="places-grid" id="places-grid"></div>
+    </section>
+
+    <!-- ===== Notes ===== -->
+    <section id="page-notes" class="page">
+      <div class="page-header">
+        <h2>&#128221; &#38543;&#24515;&#35760;</h2>
+        <button class="btn-primary" onclick="APP.showModal('note')">+ &#20889;&#38543;&#31508;</button>
+      </div>
+      <div class="notes-filter">
+        <button class="filter-btn active" data-filter="all" onclick="APP.filterNotes('all')">&#20840;&#37096;</button>
+        <button class="filter-btn" data-filter="&#26085;&#24120;" onclick="APP.filterNotes('&#26085;&#24120;')">&#26085;&#24120;</button>
+        <button class="filter-btn" data-filter="&#24863;&#21160;" onclick="APP.filterNotes('&#24863;&#21160;')">&#24863;&#21160;</button>
+        <button class="filter-btn" data-filter="&#29609;&#31505;" onclick="APP.filterNotes('&#29609;&#31505;')">&#29609;&#31505;</button>
+        <button class="filter-btn" data-filter="&#24778;&#21916;" onclick="APP.filterNotes('&#24778;&#21916;')">&#24778;&#21916;</button>
+      </div>
+      <div class="notes-wall" id="notes-wall"></div>
+    </section>
+
+    <!-- ===== Story ===== -->
+    <section id="page-story" class="page">
+      <div class="page-header">
+        <h2>&#128214; &#25105;&#20204;&#30340;&#25925;&#20107;</h2>
+        <button class="btn-primary" onclick="APP.showModal('story')">+ &#26032;&#31587;&#31456;</button>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <!-- ===== Wishes ===== -->
+    <section id="page-wishes" class="page">
+      <div class="page-header">
+        <h2>&#127775; &#24895;&#26395;&#28165;&#21333;</h2>
+        <button class="btn-primary" onclick="APP.showModal('wish')">+ &#26032;&#24895;&#26395;</button>
+      </div>
+      <div class="wish-progress-bar">
+        <div class="wish-progress-fill" id="wish-progress-fill" style="width:0%"></div>
+      </div>
+      <div class="wish-progress-text" id="wish-progress-text">0% &#24050;&#23436;&#25104;</div>
+      <div class="wishes-list" id="wishes-list"></div>
+    </section>
+  </main>
+
+  <nav id="bottom-nav">
+    <button class="nav-btn active" data-page="home" onclick="APP.navigate('home')">
+      <span class="nav-icon">&#127968;</span>
+      <span class="nav-label">&#39318;&#39029;</span>
+    </button>
+    <button class="nav-btn" data-page="calendar" onclick="APP.navigate('calendar')">
+      <span class="nav-icon">&#128197;</span>
+      <span class="nav-label">&#26102;&#20809;</span>
+    </button>
+    <button class="nav-btn" data-page="places" onclick="APP.navigate('places')">
+      <span class="nav-icon">&#128205;</span>
+      <span class="nav-label">&#36275;&#36857;</span>
+    </button>
+    <button class="nav-btn" data-page="notes" onclick="APP.navigate('notes')">
+      <span class="nav-icon">&#128221;</span>
+      <span class="nav-label">&#38543;&#31508;</span>
+    </button>
+    <button class="nav-btn" data-page="story" onclick="APP.navigate('story')">
+      <span class="nav-icon">&#128214;</span>
+      <span class="nav-label">&#25925;&#20107;</span>
+    </button>
+    <button class="nav-btn" data-page="wishes" onclick="APP.navigate('wishes')">
+      <span class="nav-icon">&#127775;</span>
+      <span class="nav-label">&#24895;&#26395;</span>
+    </button>
+  </nav>
+</div>
+
+<div id="modal-overlay" class="modal-overlay hidden" onclick="APP.closeModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modal-title">&#26631;&#39064;</h3>
+      <button class="btn-icon" onclick="APP.closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/db.js"></script>
+<script src="js/api.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
